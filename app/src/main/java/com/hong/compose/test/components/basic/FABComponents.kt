@@ -1,6 +1,7 @@
 package com.hong.compose.test.components.basic
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -406,6 +412,10 @@ fun FloatingActionButtonDemo() {
                     }
                 }
             }
+
+            item {
+                LoginForm()
+            }
         }
 
         // 显示Snackbar提示
@@ -427,6 +437,159 @@ fun FloatingActionButtonDemo() {
                     color = MaterialTheme.colorScheme.inverseOnSurface,
                     style = MaterialTheme.typography.bodyMedium
                 )
+            }
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginForm() {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var agreedToTerms by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    val isFormValid = email.isNotBlank() && password.length >= 6 && agreedToTerms
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // 标题
+                Text(
+                    text = "欢迎回来",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+
+                // 邮箱输入
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        showError = false
+                    },
+                    label = { Text("邮箱地址") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Email, contentDescription = "邮箱")
+                    },
+                    isError = showError && email.isBlank(),
+                    supportingText = {
+                        if (showError && email.isBlank()) {
+                            Text(
+                                text = "请输入邮箱地址",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // 密码输入
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        showError = false
+                    },
+                    label = { Text("密码") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Lock, contentDescription = "密码")
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.Visibility
+                                else Icons.Default.VisibilityOff,
+                                contentDescription = if (passwordVisible) "隐藏" else "显示"
+                            )
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    isError = showError && password.length < 6,
+                    supportingText = {
+                        if (showError && password.length < 6) {
+                            Text(
+                                text = "密码至少需要6位字符",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // 同意条款
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = agreedToTerms,
+                        onCheckedChange = { agreedToTerms = it }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("我同意用户协议")
+                }
+
+                // 登录按钮
+                Button(
+                    onClick = {
+                        if (isFormValid) {
+                            isLoading = true
+                            // 模拟登录请求
+                        } else {
+                            showError = true
+                        }
+                    },
+                    enabled = !isLoading && isFormValid,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("登录")
+                    }
+                }
+
+                // 注册链接
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("还没有账号？")
+
+                    TextButton(onClick = { }) {
+                        Text("立即注册")
+                    }
+                }
             }
         }
     }
